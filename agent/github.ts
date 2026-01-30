@@ -1,12 +1,13 @@
 import 'dotenv/config'
 import { Sandbox } from '@e2b/code-interpreter'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
-import { graph } from "./graph"
+
+import { GraphState } from './state'
 
 const githubUrl = 'https://github.com/noothiakshith/lovable.git'
 const sandboxDir = '/home/user'
 
-export const githubnode = async () => {
+export const githubnode = async (state: typeof GraphState.State) => {
     const name = githubUrl.split('/').pop()?.replace('.git', '')
     if (!name) throw new Error('Invalid GitHub URL')
 
@@ -22,14 +23,14 @@ export const githubnode = async () => {
         await sbx.commands.run(`git clone ${githubUrl} ${repoDir}`, { timeoutMs: 60000 })
 
         console.log(`Running agent...`)
-        const result = await graph.invoke(
+        const result = await invoke(
             {
                 messages: [
                     new SystemMessage(
                         `You are an expert in reading repositories.
              You have access to a sandbox environment where the repository is cloned at ${repoDir}.
              You must explore the repo using tools only.
-             Start by listing the files in the repository directory.`
+             Start by listing the files in the repository directory. and user history ${state.resume_data.skills} is the user skills`
                     ),
                     new HumanMessage("Give me a 30-line detailed summary of this repository."),
                 ],
@@ -54,5 +55,3 @@ export const githubnode = async () => {
         // await sbx.kill() 
     }
 }
-
-githubnode()

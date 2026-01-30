@@ -1,13 +1,12 @@
 import { ChatMistralAI } from "@langchain/mistralai"
 import { PDFParse } from "pdf-parse"
 import * as z from 'zod'
-import { SystemMessage,HumanMessage } from "langchain"
-
+import { SystemMessage, HumanMessage } from "langchain"
+import { GraphState } from "./state"
 const llm = new ChatMistralAI({
     model: "mistral-large-latest",
     temperature: 0,
     maxRetries: 2,
-    // other params...
 })
 const systemprompt = `
 You are a senior technical recruiter and resume analyst with experience evaluating
@@ -56,26 +55,26 @@ Output Requirements:
 const filepath = './akshith-latest (1).pdf'
 
 export const resumeschema = z.object({
-    name:z.string().describe("Give the candidate name"),
-    experience:z.number(),
-    skills:z.array(z.string()),
-    githuburl:z.string().url(),
-    mobilenumber:z.number(),
-    email:z.string().email(),
-    assesment:z.object({
-        rating:z.number(),
-        feedback:z.string(),
-        redflags:z.array(z.string()),
-        strengths:z.array(z.string()),
-        recommendations:z.array(z.string()),
-        isinterviewable:z.boolean(),
-        comments:z.string(),
-        priority:z.enum(['high','medium','low'])
+    name: z.string().describe("Give the candidate name"),
+    experience: z.number(),
+    skills: z.array(z.string()),
+    githuburl: z.string().url(),
+    mobilenumber: z.number(),
+    email: z.string().email(),
+    assesment: z.object({
+        rating: z.number(),
+        feedback: z.string(),
+        redflags: z.array(z.string()),
+        strengths: z.array(z.string()),
+        recommendations: z.array(z.string()),
+        isinterviewable: z.boolean(),
+        comments: z.string(),
+        priority: z.enum(['high', 'medium', 'low'])
     })
-    
+
 })
-export const resumenode = async()=>{
-    const test = new PDFParse({url:filepath});
+export const resumenode = async (state: typeof GraphState.State) => {
+    const test = new PDFParse({ url: filepath });
     const result = await test.getText();
     console.log(result.text);
 
@@ -84,6 +83,17 @@ export const resumenode = async()=>{
         new HumanMessage(result.text),
     ])
     console.log(response);
+    console.log("returning bro")
+    return {
+        resume_data: {
+            experience: response.experience,
+            skills: response.skills,
+            rating: response.assesment.rating,
+            feedback: response.assesment.feedback,
+            redflags: response.assesment.redflags,
+            strengths: response.assesment.strengths,
+            comments: response.assesment.comments,
+            priority: response.assesment.priority
+        }
+    }
 }
-
-resumenode()
