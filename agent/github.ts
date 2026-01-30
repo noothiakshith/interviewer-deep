@@ -3,7 +3,7 @@ import { Sandbox } from '@e2b/code-interpreter'
 import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { graph } from "./graph"
 
-const githubUrl = 'https://github.com/noothiakshith/interviewer-deep.git'
+const githubUrl = 'https://github.com/noothiakshith/lovable.git'
 const sandboxDir = '/home/user'
 
 export const githubnode = async () => {
