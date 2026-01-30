@@ -86,6 +86,7 @@ export const resumenode = async (state: typeof GraphState.State) => {
     console.log("returning bro")
     return {
         resume_data: {
+            name: response.name,
             experience: response.experience,
             skills: response.skills,
             rating: response.assesment.rating,

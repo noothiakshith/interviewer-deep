@@ -4,7 +4,7 @@ import { GraphState } from "./state";
 export const main = async () => {
     const initialConfig: typeof GraphState.State = {
         messages: [],
-        input_url: "https://github.com/noothiakshith/iomp1.git", 
+        input_url: "https://github.com/noothiakshith/iomp1.git",
         resume_data: {
             experience: 0,
             skills: [],
@@ -26,12 +26,12 @@ export const main = async () => {
             questions: [],
             flowscore: 0
         },
-    } as any; 
+    } as any;
 
     console.log("Invoking agent...");
     const response = await app.invoke(initialConfig);
     console.log("Agent finished!");
-    console.log("Final State:", JSON.stringify(response, null, 2));
+    // console.log("Final State:", JSON.stringify(response, null, 2));
 }
 
 main()

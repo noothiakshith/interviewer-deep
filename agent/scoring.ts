@@ -1,160 +1,101 @@
 import { ChatMistralAI } from "@langchain/mistralai"
 import { HumanMessage, SystemMessage } from "langchain"
-import {GraphState} from './state'
+import { GraphState } from './state'
+import * as z from 'zod'
+
 const llm = new ChatMistralAI({
-    model: "mistral-large-latest",
-    temperature: 0,
-    maxRetries: 2,
-    // other params...
+  model: "mistral-large-latest",
+  temperature: 0,
+  maxRetries: 2,
 })
-export const mockData = {
-  repository: {
-    name: "Lovable",
-    type: "full-stack",
-    purpose:
-      "A modern web application with authentication, AI/agent capabilities, and a scalable architecture.",
-    overview: {
-      frontend: true,
-      backend: true,
-      aiAgents: true,
-      dockerized: true,
-      cloudReady: true,
-    },
-    backend: {
-      path: "/backend",
-      runtime: "Bun",
-      language: "TypeScript",
-      framework: "Express.js",
-      database: {
-        orm: "Prisma",
-        supported: ["PostgreSQL", "SQLite"],
-        configPath: "/backend/prisma",
-      },
-      authentication: {
-        enabled: true,
-        method: "JWT / Middleware-based",
-        file: "auth-middleware.ts",
-      },
-      api: {
-        style: "REST",
-        structure: "/api",
-      },
-      agentSystem: {
-        enabled: true,
-        path: "/agent",
-        description: "AI/automation agents for advanced workflows",
-      },
-      docker: {
-        enabled: true,
-        files: ["e2b.Dockerfile", "e2b.toml"],
-      },
-      customModules: ["sathwik"],
-      dependencyManagement: ["package.json", "bun.lock"],
-    },
-    frontend: {
-      path: "/frontend",
-      framework: "React",
-      bundler: "Vite",
-      language: "TypeScript",
-      styling: "Tailwind CSS / Component-based UI",
-      linting: "ESLint",
-      routing: "React Router (assumed)",
-      staticAssets: "/public",
-      deployment: {
-        platform: "Vercel",
-        config: "vercel.json",
-      },
-    },
-    documentation: {
-      deploymentGuides: ["DEPLOYMENT.md", "QUICK_DEPLOY.md"],
-      gitignoreConfigured: true,
-    },
-    keyFeatures: [
-      "Full-stack TypeScript architecture",
-      "Authentication & authorization",
-      "Prisma-based database layer",
-      "AI/agent system",
-      "Dockerized backend",
-      "Modern frontend tooling (Vite + React)",
-      "Cloud-ready deployment",
-    ],
-    summary:
-      "A modular, scalable full-stack application using modern TypeScript tooling, AI agents, and cloud-first deployment practices.",
-  },
 
-  candidate: {
-    personalInfo: {
-      name: "Noothi Akshith",
-      experienceYears: 1.5,
-      email: "akshith166@gmail.com",
-      mobileNumber: "916281651078",
-      github: "https://github.com/noothiakshith",
-    },
-    skills: {
-      languages: ["C++", "JavaScript (ES6+)"],
-      frontend: ["React.js", "Next.js", "Tailwind CSS"],
-      backend: ["Node.js", "Express.js", "Prisma"],
-      databases: ["PostgreSQL", "MongoDB", "Redis"],
-      realtime: ["WebSockets", "SSE", "Redis Pub/Sub"],
-      infra: [
-        "Docker",
-        "Kubernetes (Pods, HPA, Ingress)",
-        "Nginx",
-        "AWS (EC2, S3)",
-        "CI/CD (GitHub, GitLab)",
-      ],
-      aiAndMedia: ["WhisperX", "Modal", "Gemini API"],
-      problemSolving: {
-        platform: "LeetCode",
-        problemsSolved: 600,
-        contestRating: 1563,
-      },
-    },
-    assessment: {
-      rating: 78,
-      priority: "high",
-      isInterviewable: true,
-      summary:
-        "High-potential mid-level engineer with strong backend, DevOps, and distributed systems experience.",
-      strengths: [
-        "Strong backend and infrastructure skills",
-        "Hands-on Kubernetes and cloud experience",
-        "Experience building scalable distributed systems",
-        "Demonstrated performance and latency optimizations",
-        "Clear ownership of complex projects",
-      ],
-      redFlags: [
-        "Limited professional experience (1.5 years)",
-        "Limited leadership or mentorship exposure",
-        "Kubernetes experience not yet deeply production-heavy",
-        "LeetCode performance is solid but not elite",
-      ],
-      recommendations: [
-        "Gain 1–2 more years of industry experience",
-        "Take ownership of larger systems",
-        "Mentor junior engineers",
-        "Contribute to open source or write technical blogs",
-        "Deepen system design knowledge (caching, consensus, DB internals)",
-      ],
-      finalComment:
-        "A strong mid-level candidate with excellent technical fundamentals and clear growth trajectory. Best suited for backend or DevOps-focused roles.",
-    },
-  },
-} as const
+const systemprompt = `You are an expert technical evaluator. Your task is to synthesize data from a candidate's resume and a GitHub repository analysis into a final, comprehensive scoring report.
 
-const systemprompt = 'you are an expert scoring agent with lot of experience and now u are given data of candiate with their projects and resume detailed ansalysis and score it based on a neat predictable formula'
+You will be provided with:
+1. Resume Analysis (experience, skills, ratings, red flags, strong points).
+2. GitHub Analysis (code quality, complexity, tech stack, ratings).
 
-export const scoringnode = async(state:typeof GraphState.State)=>{
+Your Goal:
+1. Calculate an 'overallrating' (0-100) that intelligently weighs both inputs. 
+   - Resume normally accounts for ~40% (experience, fit).
+   - GitHub accounts for ~60% (actual coding ability, best practices).
+   - Be critical; do not inflate scores.
+2. Provide a 'verdict' text summarizing why this candidate is a Hire/No-Hire.
+3. Consolidate the data into the final structured format.
+
+Ensure 'url' matches the input URL. Use the exact data provided for 'resume' and 'github' fields, do not hallucinate new values.`
+
+const questionsSchema = z.object({
+  url: z.string(),
+  resume: z.any(), // We trust the structure coming from state, or can refine logic to map it
+  github: z.any(),
+  overallrating: z.number(),
+  verdict: z.string()
+});
+// A more specific schema to match the 'general' interface more closely if we want validation,
+// but for now, we want to construct the 'general' object.
+// Actually, let's make the schema match strictly so the LLM constructs it properly.
+
+const generalschema = z.object({
+  url: z.string(),
+  resume: z.object({
+    experience: z.number(),
+    skills: z.array(z.string()),
+    rating: z.number(),
+    feedback: z.string(),
+    redflags: z.array(z.string()),
+    strengths: z.array(z.string()),
+    comments: z.array(z.string()), // Note: interface says comments: strings[]
+    priority: z.string()
+  }),
+  github: z.object({
+    url: z.string(),
+    techstack: z.array(z.string()),
+    rating: z.number(),
+    isgenuine: z.boolean(),
+    detailedview: z.string(),
+    codequality: z.string(),
+    projectimpact: z.string(),
+    questions: z.array(z.string()),
+    flowscore: z.number()
+  }),
+  overallrating: z.number(),
+  verdict: z.string()
+})
+
+export const scoringnode = async (state: typeof GraphState.State) => {
   const data = {
-    resume:state.resume_data,
-    github:state.github_data,
-    input_url:state.input_url,
-    messages:state.messages,
+    resume: state.resume_data,
+    github: state.github_data,
+    input_url: state.input_url,
   }
-    const response = await llm.invoke([
-        new SystemMessage(systemprompt),
-        new HumanMessage(JSON.stringify(data))
-    ])
-    console.log(response.content)
+
+  // We send state.resume_data and state.github_data to the model 
+  // and ask it to output the 'general' structure.
+
+  // However, to save tokens and ensure exact fidelity of the nested objects, 
+  // we could might just ask for the rating and verdict, and construct the rest manually.
+  // BUT the user asked for a "scoring node" that analyzes. 
+  // Let's let the LLM do the synthesis but we pass strict context.
+
+  const response = await llm.withStructuredOutput(generalschema).invoke([
+    new SystemMessage(systemprompt),
+    new HumanMessage(`Analyze this candidate data and produce the final report:\n${JSON.stringify(data, null, 2)}`)
+  ])
+
+  console.log("--------------------------------------------------")
+  console.log("FINAL SCORING REPORT")
+  console.log("--------------------------------------------------")
+  console.log(`Candidate Name: ${state.resume_data.name || "N/A"}`) // accessing optional prop if exists or just skip
+  console.log(`Overall Rating: ${response.overallrating}/100`)
+  console.log(`Verdict: ${response.verdict}`)
+  console.log("--------------------------------------------------")
+  console.log("Resume Rating:", response.resume.rating)
+  console.log("GitHub Rating:", response.github.rating)
+  console.log("--------------------------------------------------")
+
+  return {
+    final_report: response
+  }
 }
 
