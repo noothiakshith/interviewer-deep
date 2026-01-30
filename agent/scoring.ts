@@ -27,14 +27,11 @@ Ensure 'url' matches the input URL. Use the exact data provided for 'resume' and
 
 const questionsSchema = z.object({
   url: z.string(),
-  resume: z.any(), // We trust the structure coming from state, or can refine logic to map it
+  resume: z.any(), 
   github: z.any(),
   overallrating: z.number(),
   verdict: z.string()
 });
-// A more specific schema to match the 'general' interface more closely if we want validation,
-// but for now, we want to construct the 'general' object.
-// Actually, let's make the schema match strictly so the LLM constructs it properly.
 
 const generalschema = z.object({
   url: z.string(),
@@ -45,7 +42,7 @@ const generalschema = z.object({
     feedback: z.string(),
     redflags: z.array(z.string()),
     strengths: z.array(z.string()),
-    comments: z.array(z.string()), // Note: interface says comments: strings[]
+    comments: z.array(z.string()), 
     priority: z.string()
   }),
   github: z.object({
@@ -70,13 +67,7 @@ export const scoringnode = async (state: typeof GraphState.State) => {
     input_url: state.input_url,
   }
 
-  // We send state.resume_data and state.github_data to the model 
-  // and ask it to output the 'general' structure.
 
-  // However, to save tokens and ensure exact fidelity of the nested objects, 
-  // we could might just ask for the rating and verdict, and construct the rest manually.
-  // BUT the user asked for a "scoring node" that analyzes. 
-  // Let's let the LLM do the synthesis but we pass strict context.
 
   const response = await llm.withStructuredOutput(generalschema).invoke([
     new SystemMessage(systemprompt),
@@ -86,7 +77,7 @@ export const scoringnode = async (state: typeof GraphState.State) => {
   console.log("--------------------------------------------------")
   console.log("FINAL SCORING REPORT")
   console.log("--------------------------------------------------")
-  console.log(`Candidate Name: ${state.resume_data.name || "N/A"}`) // accessing optional prop if exists or just skip
+  console.log(`Candidate Name: ${state.resume_data.name || "N/A"}`)
   console.log(`Overall Rating: ${response.overallrating}/100`)
   console.log(`Verdict: ${response.verdict}`)
   console.log("--------------------------------------------------")

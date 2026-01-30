@@ -31,7 +31,6 @@ export const main = async () => {
     console.log("Invoking agent...");
     const response = await app.invoke(initialConfig);
     console.log("Agent finished!");
-    // console.log("Final State:", JSON.stringify(response, null, 2));
 }
 
 main()
