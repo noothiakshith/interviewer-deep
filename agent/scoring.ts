@@ -1,6 +1,6 @@
 import { ChatMistralAI } from "@langchain/mistralai"
 import { HumanMessage, SystemMessage } from "langchain"
-
+import {GraphState} from './state'
 const llm = new ChatMistralAI({
     model: "mistral-large-latest",
     temperature: 0,
@@ -144,12 +144,17 @@ export const mockData = {
 
 const systemprompt = 'you are an expert scoring agent with lot of experience and now u are given data of candiate with their projects and resume detailed ansalysis and score it based on a neat predictable formula'
 
-export const scoringnode = async()=>{
+export const scoringnode = async(state:typeof GraphState.State)=>{
+  const data = {
+    resume:state.resume_data,
+    github:state.github_data,
+    input_url:state.input_url,
+    messages:state.messages,
+  }
     const response = await llm.invoke([
         new SystemMessage(systemprompt),
-        new HumanMessage(JSON.stringify(mockData))
+        new HumanMessage(JSON.stringify(data))
     ])
     console.log(response.content)
 }
 
-scoringnode()
