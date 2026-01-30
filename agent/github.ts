@@ -1,57 +1,49 @@
-import 'dotenv/config'
-import { Sandbox } from '@e2b/code-interpreter'
-import { SystemMessage, HumanMessage } from '@langchain/core/messages'
+import { ChatMistralAI } from "@langchain/mistralai"
+import { HumanMessage, SystemMessage } from "langchain"
+import * as z from 'zod'
+import type { GraphState } from "./state"
+import { listFilesTool, readFileTool, runCommandTool } from "./tools"
 
-import { GraphState } from './state'
+const llm = new ChatMistralAI({
+    model: "mistral-large-latest",
+    temperature: 0,
+    maxRetries: 2,
+})
 
-const githubUrl = 'https://github.com/noothiakshith/lovable.git'
-const sandboxDir = '/home/user'
+const llmWithTools = llm.bindTools([readFileTool, listFilesTool, runCommandTool])
+
+export const githubschema = z.object({
+    url: z.string().url(),
+    techstack: z.array(z.string()),
+    rating: z.number(),
+    isgenuine: z.boolean(),
+    detailedview: z.string(),
+    codequality: z.string(),
+    projectimpact: z.string(),
+    questions: z.array(z.string()),
+    flowscore: z.number()
+})
+
+const Systemprompt = `You are an expert github agent with experience evaluating u need to go through the whole github repo and evaluate the repo on software engineeering standards u know and the url `
 
 export const githubnode = async (state: typeof GraphState.State) => {
-    const name = githubUrl.split('/').pop()?.replace('.git', '')
-    if (!name) throw new Error('Invalid GitHub URL')
-
-    console.log(`Creating sandbox...`)
-    const sbx = await Sandbox.create({
-        apiKey: process.env.E2B_API_KEY,
-    })
-    console.log(`Sandbox created: ${sbx.sandboxId}`)
-
-    try {
-        const repoDir = `${sandboxDir}/${name}`
-        console.log(`Cloning ${githubUrl} to ${repoDir}...`)
-        await sbx.commands.run(`git clone ${githubUrl} ${repoDir}`, { timeoutMs: 60000 })
-
-        console.log(`Running agent...`)
-        const result = await invoke(
-            {
-                messages: [
-                    new SystemMessage(
-                        `You are an expert in reading repositories.
-             You have access to a sandbox environment where the repository is cloned at ${repoDir}.
-             You must explore the repo using tools only.
-             Start by listing the files in the repository directory. and user history ${state.resume_data.skills} is the user skills`
-                    ),
-                    new HumanMessage("Give me a 30-line detailed summary of this repository."),
-                ],
-            },
-            {
-                configurable: {
-                    sandboxId: sbx.sandboxId,
-                },
-            }
-        )
-
-        const finalMessages = result.messages;
-        console.log("Final Response:");
-        if (finalMessages && finalMessages.length > 0) {
-            console.log(finalMessages[finalMessages.length - 1].content)
+    const response = await llm.withStructuredOutput(githubschema).invoke([
+        new SystemMessage(Systemprompt),
+        new HumanMessage(`Do the github evaluation for the url ${state.input_url}`),
+    ])
+    console.log(response)
+    console.log("bro calling the github node")
+    return {
+        github_data: {
+            url: state.input_url,
+            techstack: response.techstack,
+            rating: response.rating,
+            isgenuine: response.isgenuine,
+            detailedview: response.detailedview,
+            codequality: response.codequality,
+            projectimpact: response.projectimpact,
+            questions: response.questions,
+            flowscore: response.flowscore
         }
-
-    } catch (error) {
-        console.error(error)
-    } finally {
-        // Keep sandbox alive for inspection if needed, or kill it. 
-        // await sbx.kill() 
     }
 }

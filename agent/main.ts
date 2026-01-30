@@ -4,7 +4,7 @@ import { GraphState } from "./state";
 export const main = async () => {
     const initialConfig: typeof GraphState.State = {
         messages: [],
-        input_url: "https://github.com/noothiakshith/lovable", 
+        input_url: "https://github.com/noothiakshith/lovable.git", 
         resume_data: {
             experience: 0,
             skills: [],

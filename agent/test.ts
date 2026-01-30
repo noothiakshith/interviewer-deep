@@ -6,3 +6,4 @@ const llm = new ChatMistralAI({
     maxRetries: 2,
     // other params...
 })
+ 
