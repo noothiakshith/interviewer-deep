@@ -10,12 +10,14 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@e2b/code-interpreter": "^2.3.3",
     "@langchain/core": "^1.1.17",
     "@langchain/langgraph": "^1.1.2",
     "@langchain/mistralai": "^1.0.3",
     "@langchain/ollama": "^1.2.1",
     "@langchain/tavily": "^1.2.0",
     "deepagents": "^1.6.1",
+    "dotenv": "^17.2.3",
     "langchain": "^1.2.15",
     "pdf-parse": "^2.4.5",
     "zod": "^4.3.6"
