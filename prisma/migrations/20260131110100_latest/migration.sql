@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('USER', 'TEACHER', 'ADMIN');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "Role" TEXT NOT NULL DEFAULT 'USER';

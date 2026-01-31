@@ -32,6 +32,11 @@ enum ComplexityLevel {
   MEDIUM
   HIGH
 }
+enum Role{
+  USER
+  TEACHER
+  ADMIN
+}
 
 model User {
   id               String   @id @default(uuid())
@@ -40,6 +45,7 @@ model User {
   passwordHash     String
   githubProfileUrl String?
   createdAt        DateTime @default(now())
+  Role             Role   @default(USER)
 
   submissions Submission[]
 }
