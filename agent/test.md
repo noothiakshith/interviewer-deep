@@ -33,15 +33,18 @@ enum ComplexityLevel {
   HIGH
 }
 
+
+
+
 model User {
-  id               String   @id @default(uuid())
+  id               String       @id @default(uuid())
   fullName         String
-  email            String   @unique
+  email            String       @unique
   passwordHash     String
   githubProfileUrl String?
-  createdAt        DateTime @default(now())
-
-  submissions Submission[]
+  createdAt        DateTime     @default(now())
+  
+  submissions      Submission[]
 }
 
 model Submission {
@@ -54,8 +57,8 @@ model Submission {
   updatedAt        DateTime         @updatedAt
 
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  aiAnalysisReport AiAnalysisReport?
-  interviewSession InterviewSession?
+  aiAnalysisReport AiAnalysisReport? 
+  interviewSession InterviewSession? 
 
   @@index([userId])
 }
@@ -63,27 +66,27 @@ model Submission {
 model AiAnalysisReport {
   id             String   @id @default(uuid())
   submissionId   String   @unique
-  resumeScore    Int? // e.g. 78
-  githubScore    Float? // e.g. 4.2
-  totalScore     Int? // e.g. 56
+  resumeScore    Int?     // e.g. 78
+  githubScore    Float?   // e.g. 4.2
+  totalScore     Int?     // e.g. 56
   finalVerdict   String?  @db.Text
-  rawReport      String?  @db.Text
-  structuredData Json?
+  rawReport      String?  @db.Text 
+  structuredData Json?    
   createdAt      DateTime @default(now())
 
   submission    Submission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  repoQuestions RepoQuestion[]
+  repoQuestions RepoQuestion[] 
 }
 
 model RepoQuestion {
   id              String          @id @default(uuid())
   reportId        String
   questionText    String          @db.Text
-  codeContext     String?         @db.Text
+  codeContext     String?         @db.Text 
   complexityLevel ComplexityLevel @default(MEDIUM)
 
   aiAnalysisReport   AiAnalysisReport    @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  interviewResponses InterviewResponse[]
+  interviewResponses InterviewResponse[] 
 }
 
 model InterviewSession {
@@ -98,13 +101,13 @@ model InterviewSession {
 }
 
 model InterviewResponse {
-  id               String   @id @default(uuid())
-  sessionId        String
-  questionId       String
-  candidateAnswer  String?  @db.Text
-  aiReviewFeedback String?  @db.Text
-  aiRatingScore    Int?
-  answeredAt       DateTime @default(now())
+  id              String   @id @default(uuid())
+  sessionId       String
+  questionId      String
+  candidateAnswer String?  @db.Text
+  aiReviewFeedback String? @db.Text
+  aiRatingScore   Int?     
+  answeredAt      DateTime @default(now())
 
   interviewSession InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   repoQuestion     RepoQuestion     @relation(fields: [questionId], references: [id])

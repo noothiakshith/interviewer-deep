@@ -1,9 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `test` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "SubmissionStatus" AS ENUM ('PENDING_ANALYSIS', 'ANALYSIS_COMPLETE', 'INTERVIEW_IN_PROGRESS', 'READY_FOR_HUMAN', 'REJECTED');
 
@@ -12,9 +6,6 @@ CREATE TYPE "InterviewStatus" AS ENUM ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'
 
 -- CreateEnum
 CREATE TYPE "ComplexityLevel" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
-
--- DropTable
-DROP TABLE "test";
 
 -- CreateTable
 CREATE TABLE "User" (
