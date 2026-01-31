@@ -36,5 +36,6 @@ router.post('/resume-parse', async (req, res, next) => {
     } as any;
     const response = await app.invoke(initialConfig);
     console.log(response)
+    res.json(response)
 })
 export default router
