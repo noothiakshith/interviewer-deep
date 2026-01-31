@@ -52,7 +52,7 @@ Output Requirements:
   high / medium / low.
 `;
 
-const filepath = './akshith-latest (1).pdf'
+const filepath = '/Users/akshith/Projects/fullapp/agent/akshith-latest (1).pdf'
 
 export const resumeschema = z.object({
     name: z.string().describe("Give the candidate name"),
