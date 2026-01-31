@@ -42,6 +42,7 @@ export const GraphState = Annotation.Root({
         default: () => [],
     }),
     input_url: Annotation<string>(),
+    github_url: Annotation<string>(),
     resume_data: Annotation<resume>({
         reducer: (current, update) => ({ ...current, ...update }),
         default: () => ({} as resume),

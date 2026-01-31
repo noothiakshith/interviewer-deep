@@ -32,7 +32,24 @@ export const githubnode = async (state: typeof GraphState.State) => {
     console.log(sandbox.sandboxId);
     console.log("sandbox has been running");
 
-    const gitclone = await sandbox.commands.run(`git clone ${state.input_url}`)
+    if (!state.github_url) {
+        console.log("githubnode: No github_url provided, skipping GitHub analysis.");
+        return {
+            github_data: {
+                url: "",
+                techstack: [],
+                rating: 0,
+                isgenuine: false,
+                detailedview: "No GitHub URL provided",
+                codequality: "",
+                projectimpact: "",
+                questions: [],
+                flowscore: 0
+            }
+        }
+    }
+
+    const gitclone = await sandbox.commands.run(`git clone ${state.github_url}`)
     console.log(gitclone)
     const Systemprompt = `You are an expert github agent with experience evaluating u need to go through the whole github repo and evaluate the repo on software engineeering standards u know and the url and you are also having all the tools like readfile, listfiles, runcommand to evaluate the github repo use them and read completely You need not to read all packages or files u need read the core content not lockfiles or test files just core content if u feel that read information is enough then stop`
 
@@ -44,7 +61,7 @@ export const githubnode = async (state: typeof GraphState.State) => {
 
     const messages: any[] = [
         new SystemMessage(Systemprompt),
-        new HumanMessage(`Do the github evaluation for the url ${state.input_url}. The repo is cloned. Start by listing files to understand the structure.`),
+        new HumanMessage(`Do the github evaluation for the url ${state.github_url}. The repo is cloned. Start by listing files to understand the structure.`),
     ];
 
     for (let i = 0; i < 5; i++) {
@@ -110,7 +127,7 @@ export const githubnode = async (state: typeof GraphState.State) => {
 
     return {
         github_data: {
-            url: state.input_url,
+            url: state.github_url,
             techstack: response.techstack,
             rating: response.rating,
             isgenuine: response.isgenuine,

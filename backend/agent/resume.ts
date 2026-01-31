@@ -3,11 +3,14 @@ import { PDFParse } from "pdf-parse"
 import * as z from 'zod'
 import { SystemMessage, HumanMessage } from "langchain"
 import { GraphState } from "./state"
+import fs from 'fs'
+
 const llm = new ChatMistralAI({
     model: "mistral-large-latest",
     temperature: 0,
     maxRetries: 2,
 })
+
 const systemprompt = `
 You are a senior technical recruiter and resume analyst with experience evaluating
 high-quality software engineers at top technology companies.
@@ -52,8 +55,6 @@ Output Requirements:
   high / medium / low.
 `;
 
-const filepath = '/Users/akshith/Projects/fullapp/agent/akshith-latest (1).pdf'
-
 export const resumeschema = z.object({
     name: z.string().describe("Give the candidate name"),
     experience: z.number(),
@@ -73,28 +74,54 @@ export const resumeschema = z.object({
     })
 
 })
-export const resumenode = async (state: typeof GraphState.State) => {
-    const test = new PDFParse({ url: filepath });
-    const result = await test.getText();
-    console.log(result.text);
 
-    const response = await llm.withStructuredOutput(resumeschema).invoke([
-        new SystemMessage(systemprompt),
-        new HumanMessage(result.text),
-    ])
-    console.log(response);
-    console.log("returning bro")
-    return {
-        resume_data: {
-            name: response.name,
-            experience: response.experience,
-            skills: response.skills,
-            rating: response.assesment.rating,
-            feedback: response.assesment.feedback,
-            redflags: response.assesment.redflags,
-            strengths: response.assesment.strengths,
-            comments: response.assesment.comments,
-            priority: response.assesment.priority
+export const resumenode = async (state: typeof GraphState.State) => {
+    console.log("resumenode: parsing file at", state.input_url);
+    try {
+        if (!fs.existsSync(state.input_url)) {
+            throw new Error(`File not found at path: ${state.input_url}`);
         }
+
+        const dataBuffer = fs.readFileSync(state.input_url);
+        const test = new PDFParse({ data: dataBuffer });
+        const result = await test.getText();
+
+        // Handle different return types of getText()
+        let text = "";
+        if (typeof result === "string") {
+            text = result;
+        } else if (result && typeof result === "object") {
+            text = (result as any).text || Object.values(result).join(' ');
+        }
+
+        console.log("resumenode: text extracted successfully, length:", text.length);
+
+        if (!process.env.MISTRAL_API_KEY) {
+            throw new Error("MISTRAL_API_KEY is not set in environment");
+        }
+
+        const response = await llm.withStructuredOutput(resumeschema).invoke([
+            new SystemMessage(systemprompt),
+            new HumanMessage(text || "No text could be extracted from the resume."),
+        ])
+
+        console.log("resumenode: LLM response received");
+
+        return {
+            resume_data: {
+                name: response.name,
+                experience: response.experience,
+                skills: response.skills,
+                rating: response.assesment.rating,
+                feedback: response.assesment.feedback,
+                redflags: response.assesment.redflags,
+                strengths: response.assesment.strengths,
+                comments: response.assesment.comments,
+                priority: response.assesment.priority
+            }
+        }
+    } catch (error: any) {
+        console.error("resumenode failed:", error);
+        throw error;
     }
 }
