@@ -77,20 +77,45 @@ model AiAnalysisReport {
   structuredData Json?
   createdAt      DateTime @default(now())
 
-  submission    Submission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  repoQuestions RepoQuestion[]
+  submission     Submission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  repoQuestions  RepoQuestion[]
+  githubAnalysis GithubAnalysis?
+  resumeAnalysis ResumeAnalysis?
 }
 
-model RepoQuestion {
-  id              String          @id @default(uuid())
-  reportId        String
-  questionText    String          @db.Text
-  codeContext     String?         @db.Text
-  complexityLevel ComplexityLevel @default(MEDIUM)
+model GithubAnalysis {
+  id            String   @id @default(uuid())
+  reportId      String   @unique
+  url           String
+  techstack     String[]
+  rating        Float
+  isgenuine     Boolean
+  detailedview  String[]
+  codequality   String[]
+  projectimpact String[]
+  questions     String[]
+  flowscore     Float
 
-  aiAnalysisReport   AiAnalysisReport    @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  interviewResponses InterviewResponse[]
+  aiAnalysisReport AiAnalysisReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
 }
+
+model ResumeAnalysis {
+  id         String   @id @default(uuid())
+  reportId   String   @unique
+  name       String?
+  experience Int?
+  skills     String[]
+  rating     Float?
+  feedback   String?  @db.Text
+  redflags   String[]
+  strengths  String[]
+  comments   String[]
+  priority   String?
+
+  aiAnalysisReport AiAnalysisReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+}
+
+
 
 model InterviewSession {
   id           String          @id @default(uuid())

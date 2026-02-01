@@ -69,7 +69,7 @@ export const resumeschema = z.object({
         strengths: z.array(z.string()),
         recommendations: z.array(z.string()),
         isinterviewable: z.boolean(),
-        comments: z.string(),
+        comments: z.array(z.string()),
         priority: z.enum(['high', 'medium', 'low'])
     })
 
@@ -85,8 +85,7 @@ export const resumenode = async (state: typeof GraphState.State) => {
         const dataBuffer = fs.readFileSync(state.input_url);
         const test = new PDFParse({ data: dataBuffer });
         const result = await test.getText();
-
-        // Handle different return types of getText()
+        
         let text = "";
         if (typeof result === "string") {
             text = result;

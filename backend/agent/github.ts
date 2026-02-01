@@ -19,9 +19,9 @@ export const githubschema = z.object({
     techstack: z.array(z.string()),
     rating: z.number(),
     isgenuine: z.boolean(),
-    detailedview: z.string(),
-    codequality: z.string(),
-    projectimpact: z.string(),
+    detailedview: z.array(z.string()),
+    codequality: z.array(z.string()),
+    projectimpact: z.array(z.string()),
     questions: z.array(z.string()),
     flowscore: z.number()
 })
@@ -40,9 +40,9 @@ export const githubnode = async (state: typeof GraphState.State) => {
                 techstack: [],
                 rating: 0,
                 isgenuine: false,
-                detailedview: "No GitHub URL provided",
-                codequality: "",
-                projectimpact: "",
+                detailedview: ["No GitHub URL provided"],
+                codequality: [],
+                projectimpact: [],
                 questions: [],
                 flowscore: 0
             }

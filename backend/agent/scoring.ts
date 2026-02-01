@@ -27,7 +27,7 @@ Ensure 'url' matches the input URL. Use the exact data provided for 'resume' and
 
 const questionsSchema = z.object({
   url: z.string(),
-  resume: z.any(), 
+  resume: z.any(),
   github: z.any(),
   overallrating: z.number(),
   verdict: z.string()
@@ -42,7 +42,7 @@ const generalschema = z.object({
     feedback: z.string(),
     redflags: z.array(z.string()),
     strengths: z.array(z.string()),
-    comments: z.array(z.string()), 
+    comments: z.array(z.string()),
     priority: z.string()
   }),
   github: z.object({
@@ -50,9 +50,9 @@ const generalschema = z.object({
     techstack: z.array(z.string()),
     rating: z.number(),
     isgenuine: z.boolean(),
-    detailedview: z.string(),
-    codequality: z.string(),
-    projectimpact: z.string(),
+    detailedview: z.array(z.string()),
+    codequality: z.array(z.string()),
+    projectimpact: z.array(z.string()),
     questions: z.array(z.string()),
     flowscore: z.number()
   }),

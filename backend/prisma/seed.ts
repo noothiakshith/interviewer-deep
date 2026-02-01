@@ -3,18 +3,13 @@ import { prisma } from "../db";
 
 async function main() {
     console.log("Seeding database...");
-
-    // Clear existing data to avoid conflicts on multiple runs
-    // Note: Order matters due to foreign keys
     await prisma.interviewResponse.deleteMany();
     await prisma.interviewSession.deleteMany();
     await prisma.repoQuestion.deleteMany();
     await prisma.aiAnalysisReport.deleteMany();
     await prisma.submission.deleteMany();
     await prisma.user.deleteMany();
-
     const passwordHash = await bcrypt.hash("password123", 10);
-
     const user = await prisma.user.create({
         data: {
             fullName: "Test Candidate",
@@ -23,7 +18,6 @@ async function main() {
             Role: "USER",
         },
     });
-
     const teacher = await prisma.user.create({
         data: {
             fullName: "Admin Teacher",
@@ -32,7 +26,6 @@ async function main() {
             Role: "TEACHER",
         },
     });
-
     const submission = await prisma.submission.create({
         data: {
             userId: user.id,
@@ -41,7 +34,6 @@ async function main() {
             status: "INTERVIEW_IN_PROGRESS",
         },
     });
-
     const report = await prisma.aiAnalysisReport.create({
         data: {
             submissionId: submission.id,
@@ -56,7 +48,6 @@ async function main() {
             },
         },
     });
-
     const question1 = await prisma.repoQuestion.create({
         data: {
             reportId: report.id,

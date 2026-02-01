@@ -20,9 +20,9 @@ export interface github {
     techstack: string[];
     rating: number;
     isgenuine: boolean;
-    detailedview: string;
-    codequality: string;
-    projectimpact: string;
+    detailedview: string[];
+    codequality: string[];
+    projectimpact: string[];
     questions: string[];
     flowscore: number;
 }

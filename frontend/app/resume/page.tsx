@@ -27,17 +27,34 @@ const ResumePage = () => {
 
         try {
             console.log("Uploading resume...");
+            const token = localStorage.getItem('token')
+            if (!token) {
+                alert("Please log in first")
+                setLoading(false)
+                return
+            }
+
             const response = await axios.post('http://localhost:5050/resume/resume-parse', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
                 }
             })
             console.log("Analysis Result:", response.data)
-            setResult(response.data)
-            alert("Analysis complete! 🎉")
+            if (response.data.submissionId) {
+                window.location.href = `/dashboard/submissions/${response.data.submissionId}`
+            } else {
+                setResult(response.data)
+                alert("Analysis complete! 🎉")
+            }
         } catch (err: any) {
             console.error("Upload Error:", err)
-            alert(`Analysis failed: ${err.response?.data?.message || err.message}`)
+            // Handle the 418 specifically if needed
+            if (err.response?.status === 418) {
+                alert("Session expired or you are not logged in. Please log in again.")
+            } else {
+                alert(`Analysis failed: ${err.response?.data?.message || err.message}`)
+            }
         } finally {
             setLoading(false)
         }
