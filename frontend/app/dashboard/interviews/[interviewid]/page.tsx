@@ -1,7 +1,28 @@
+"use client"
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 const Page = () => {
+let recorder: MediaRecorder | null = null
+let audioChunks: Blob[] = []
+const handleVoice = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+  recorder = new MediaRecorder(stream, { mimeType: "audio/webm" })
+  audioChunks = []
+  recorder.ondataavailable = (event) => {
+    if (event.data.size > 0) audioChunks.push(event.data)
+  }
+  recorder.onstop = () => {
+    const audioBlob = new Blob(audioChunks, { type: "audio/webm" })
+    console.log("Recorded blob:", audioBlob)
+    const audioUrl = URL.createObjectURL(audioBlob)
+    new Audio(audioUrl).play()
+  }
+  recorder.start()
+  setTimeout(() => recorder?.stop(), 5000)
+}
+    
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md">
@@ -27,7 +48,7 @@ const Page = () => {
 
           {/* Buttons */}
           <div className="flex flex-col gap-3">
-            <Button variant="secondary" className="w-full">
+            <Button variant="secondary" className="w-full" onClick={handleVoice}>
               🎙 Talk
             </Button>
             <Button className="w-full">
