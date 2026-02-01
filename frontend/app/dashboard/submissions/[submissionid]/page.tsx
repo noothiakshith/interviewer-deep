@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface AnalysisData {
     submission: {
@@ -47,6 +49,7 @@ export default function SubmissionDetailsPage() {
     const [data, setData] = useState<AnalysisData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -176,7 +179,7 @@ export default function SubmissionDetailsPage() {
                             </div>
                         </div>
                     </Section>
-
+                    
                     {/* GitHub Analysis Section */}
                     <Section title="GitHub Repository Analysis">
                         <div className="space-y-6">
@@ -212,6 +215,15 @@ export default function SubmissionDetailsPage() {
 
                             <div>
                                 <h4 className="text-sm font-bold text-slate-400 uppercase mb-3">Interview Questions Generated</h4>
+                                <div>
+                                    {
+                                        report.totalScore>=60?
+                                        <Button onClick={()=>{router.push(`/dashboard/interviews/${submission.id}`)}}>Go for an interview</Button>:
+                                        <Button disabled>Not Eligible</Button>
+
+                                    }
+    
+                                </div>
                                 <div className="space-y-2">
                                 </div>
                             </div>
@@ -222,7 +234,6 @@ export default function SubmissionDetailsPage() {
         </div>
     );
 }
-
 function ScoreCard({ title, score, subtext, color }: { title: string; score: number; subtext: string; color: string }) {
     return (
         <div className={`bg-gradient-to-br ${color} p-6 rounded-3xl shadow-2xl relative overflow-hidden group`}>
