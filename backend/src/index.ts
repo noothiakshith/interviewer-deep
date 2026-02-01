@@ -4,6 +4,7 @@ import express from 'express'
 import authrouter from './routes/auth'
 import resume from './routes/resume'
 import cors from 'cors'
+import dashboard from './routes/dashboard'
 
 const app = express()
 app.use(express.json())
@@ -17,6 +18,7 @@ app.get('/health', (req, res) => {
 })
 
 app.use('/auth', authrouter)
+app.use('/dashboard',dashboard)
 app.use('/resume', resume)
 app.use((err: any, req: any, res: any, next: any) => {
     console.error(err.stack)

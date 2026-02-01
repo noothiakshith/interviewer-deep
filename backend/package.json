@@ -40,5 +40,8 @@
     "pg": "^8.17.2",
     "uploadthing": "^7.7.4",
     "zod": "^4.3.6"
+  },
+  "prisma": {
+    "seed": "bun prisma/seed.ts"
   }
 }
