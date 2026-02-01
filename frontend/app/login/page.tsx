@@ -3,9 +3,12 @@
 import React, { useState } from "react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false)
+
+  const router = useRouter()
 
   const handlesubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -59,6 +62,7 @@ const LoginPage = () => {
             type="submit"
             disabled={loading}
             className="w-full"
+            onClick={()=>{router.push('/dashboard')}}
           >
             {loading ? "Logging in..." : "Login"}
           </Button>

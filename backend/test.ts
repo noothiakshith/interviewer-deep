@@ -6,7 +6,7 @@ export const main = async () => {
       "https://api.github.com/users/noothiakshith/repos"
     )
 
-    console.log(response);
+    console.log(response.data);
   } catch (err) {
     console.error("Error fetching repos:", err);
   }

@@ -37,14 +37,13 @@ router.get('/submissions/:id', authmiddleware, async (req: AuthRequest, res: Res
         const submission = await prisma.submission.findUnique({
             where: {
                 id: id as string,
-                userId: req.user.id // Security: ensure it belongs to the user
+                userId: req.user.id
             },
             include: {
                 aiAnalysisReport: {
                     include: {
                         resumeAnalysis: true,
                         githubAnalysis: true,
-                        repoQuestions: true
                     }
                 }
             }
@@ -60,7 +59,5 @@ router.get('/submissions/:id', authmiddleware, async (req: AuthRequest, res: Res
         return res.status(500).json({ message: "Internal server error" });
     }
 });
-
-
 
 export default router

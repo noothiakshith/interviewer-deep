@@ -85,7 +85,7 @@ export const resumenode = async (state: typeof GraphState.State) => {
         const dataBuffer = fs.readFileSync(state.input_url);
         const test = new PDFParse({ data: dataBuffer });
         const result = await test.getText();
-        
+
         let text = "";
         if (typeof result === "string") {
             text = result;

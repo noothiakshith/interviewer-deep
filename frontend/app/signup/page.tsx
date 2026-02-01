@@ -3,9 +3,12 @@
 import React, { useState } from "react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 const SignupPage = () => {
   const [loading, setLoading] = useState(false)
+
+  const router = useRouter()
 
   const formsubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -80,6 +83,7 @@ const SignupPage = () => {
             type="submit"
             disabled={loading}
             className="w-full"
+            onClick={()=>{router.push('/login')}}
           >
             {loading ? "Signing up..." : "Signup"}
           </Button>

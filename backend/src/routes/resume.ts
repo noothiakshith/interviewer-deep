@@ -1,6 +1,7 @@
 import express, { Response, NextFunction } from 'express'
 import multer from 'multer'
 import path from 'path'
+import axios from 'axios'
 import { GraphState } from '../../agent/state';
 import { app } from '../../agent/graph'
 import { authmiddleware, AuthRequest } from '../../middleware'
@@ -21,7 +22,7 @@ const router = express.Router()
 router.post('/resume-parse', authmiddleware, upload.single('resume'), async (req: AuthRequest, res: Response, next: NextFunction) => {
 
     const file = req.file
-    const { github_url } = req.body
+    const github_url = req.body.github_url
 
     if (!file) {
         return res.status(400).json({ message: "Resume file is required" })
@@ -111,7 +112,7 @@ router.post('/resume-parse', authmiddleware, upload.single('resume'), async (req
                 }
             }
         });
-        
+
 
         await prisma.submission.update({
             where: { id: submission.id },
@@ -138,4 +139,33 @@ router.post('/resume-parse', authmiddleware, upload.single('resume'), async (req
         });
     }
 })
+router.get('/repos', authmiddleware, async (req: AuthRequest, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const user = await prisma.user.findUnique({
+            where: {
+                id: req.user.id
+            }
+        });
+        const url = user?.githubProfileUrl;
+        if (!url) {
+            return res.status(404).json({ message: "Github profile URL not found for user" });
+        }
+        const username = url.split('/').filter(Boolean).pop();
+        const response = await axios.get(`https://api.github.com/users/${username}/repos`, {
+            params: {
+                per_page: 10,
+                sort: "updated",
+                direction: "desc",
+            },
+        });
+        return res.status(200).json({ repos: response.data });
+    } catch (error: any) {
+        console.error("Error fetching repos:", error);
+        return res.status(500).json({ message: "Error fetching repos" });
+    }
+});
+
 export default router

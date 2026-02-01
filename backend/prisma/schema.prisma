@@ -117,6 +117,17 @@ model ResumeAnalysis {
 
 
 
+model RepoQuestion {
+  id              String          @id @default(uuid())
+  reportId        String
+  questionText    String          @db.Text
+  codeContext     String?         @db.Text
+  complexityLevel ComplexityLevel @default(MEDIUM)
+
+  aiAnalysisReport   AiAnalysisReport    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  interviewResponses InterviewResponse[]
+}
+
 model InterviewSession {
   id           String          @id @default(uuid())
   submissionId String          @unique
