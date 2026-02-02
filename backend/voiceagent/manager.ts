@@ -1,26 +1,46 @@
 import { prisma } from '../db'
 import { InterviewState } from './state'
+
 export const managernode = async (state: typeof InterviewState.State) => {
-    const analyses = await prisma.githubAnalysis.findMany({
+    // Check if userid exists in state
+    if (!state.userid?.id) {
+        console.error("User ID missing in state");
+        return { questions: [] };
+    }
+
+    // Find the most recent submission for the user
+    const submission = await prisma.submission.findFirst({
         where: {
-            id: state.userid.id
+            userId: state.userid.id
         },
-        select: {
-            questions: true,
-            id: true
+        orderBy: {
+            createdAt: 'desc'
+        },
+        include: {
+            aiAnalysisReport: {
+                include: {
+                    githubAnalysis: true
+                }
+            }
         }
     })
 
-    const questions = analyses.flatMap((analysis) => {
-        return analysis.questions.map((qText, index) => ({
-            id: `${analysis.id}-${index}`,
-            content: qText,
-            expectedKeyPoints: []
-        }));
-    });
+    const githubAnalysis = submission?.aiAnalysisReport?.githubAnalysis
+
+    if (!githubAnalysis || !githubAnalysis.questions || githubAnalysis.questions.length === 0) {
+        console.log("No analysis or questions found for user:", state.userid.id);
+        return {
+            questions: []
+        }
+    }
+
+    const questions = githubAnalysis.questions.map((qText, index) => ({
+        id: `${githubAnalysis.id}-${index}`,
+        content: qText,
+        expectedKeyPoints: []
+    }));
 
     return {
         questions: questions
     }
 }
-

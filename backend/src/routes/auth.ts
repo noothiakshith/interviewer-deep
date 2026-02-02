@@ -24,8 +24,7 @@ router.post('/signup', async (req, res) => {
         const { fullName, email, password, githuburl } = signupschema.parse(req.body)
         const usercheck = await prisma.user.findUnique({
             where: {
-                email: email,
-                fullName: fullName
+                email: email
             }
         })
         if (usercheck) {
@@ -69,11 +68,11 @@ router.post('/login', async (req, res, next) => {
         }
         else {
             const token = jwt.sign({
-              
-                    id: checkuser.id,
-                    email: checkuser.email,
-                    role: checkuser.Role
-                
+
+                id: checkuser.id,
+                email: checkuser.email,
+                role: checkuser.Role
+
             }, 'secret', { expiresIn: "1h" })
             return res.status(200).json({ message: "You are logged in successfully", token })
         }

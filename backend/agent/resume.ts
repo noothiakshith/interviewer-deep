@@ -5,11 +5,7 @@ import { SystemMessage, HumanMessage } from "@langchain/core/messages"
 import { GraphState } from "./state"
 import fs from 'fs'
 
-const llm = new ChatMistralAI({
-    model: "mistral-large-latest",
-    temperature: 0,
-    maxRetries: 2,
-})
+
 
 const systemprompt = `
 You are a senior technical recruiter and resume analyst with experience evaluating
@@ -98,6 +94,12 @@ export const resumenode = async (state: typeof GraphState.State) => {
         if (!process.env.MISTRAL_API_KEY) {
             throw new Error("MISTRAL_API_KEY is not set in environment");
         }
+
+        const llm = new ChatMistralAI({
+            model: "mistral-large-latest",
+            temperature: 0,
+            maxRetries: 2,
+        })
 
         const response = await llm.withStructuredOutput(resumeschema).invoke([
             new SystemMessage(systemprompt),

@@ -5,8 +5,8 @@ export interface Question {
   expectedKeyPoints: string[]; // For validation later
 }
 
-export interface userid{
-    id:string
+export interface userid {
+  id: string
 }
 
 // 2. The User's Answer Structure (Accumulated during the loop)
@@ -34,26 +34,22 @@ export const InterviewState = Annotation.Root({
   /**
    * 1. Questions
    * Stores the 3 questions fetched from the DB.
-   * Reducer: Overwrite (default). When the first node runs, it sets this list.
    */
   questions: Annotation<Question[]>(),
-  userid:Annotation<userid>(),
+  userid: Annotation<userid>(),
 
   /**
    * 2. Current Index
    * Tracks which question we are on (0, 1, or 2).
-   * Reducer: Overwrite. We just update the number directly.
    */
   currentQuestionIndex: Annotation<number>({
     default: () => 0,
-    reducer: (x, y) => y, // Simply replace the old index with the new one
+    reducer: (x, y) => y,
   }),
 
   /**
-   * 3. Answers (CRITICAL REDUCER)
+   * 3. Answers
    * Stores the candidate's answers. 
-   * Reducer: Append. We want to ADD to this list, not replace it, 
-   * so we can validate all 3 at the end.
    */
   answers: Annotation<UserAnswer[]>({
     default: () => [],
@@ -61,9 +57,30 @@ export const InterviewState = Annotation.Root({
   }),
 
   /**
-   * 4. Final Evaluation
+   * 4. State tracking
+   */
+  lastTranscript: Annotation<string>(),
+  audioBuffer: Annotation<Buffer | null>({
+    default: () => null,
+    reducer: (x, y) => y,
+  }),
+  awaitingAnswer: Annotation<boolean>({
+    default: () => false,
+    reducer: (x, y) => y,
+  }),
+
+  /**
+   * 5. Final Evaluation
    * Stores the result after the batch validation node runs.
-   * Reducer: Overwrite.
    */
   evaluation: Annotation<EvaluationReport | null>(),
+
+  /**
+   * 6. Question Audio (Base64)
+   * Stores the TTS audio for the current question to be sent to frontend.
+   */
+  questionAudio: Annotation<string | null>({
+    default: () => null,
+    reducer: (x, y) => y,
+  }),
 });

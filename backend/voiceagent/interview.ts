@@ -1,33 +1,45 @@
 import { InterviewState } from "./state";
-import { ElevenLabsClient, play } from '@elevenlabs/elevenlabs-js';
-import { Readable } from 'stream';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 
-export const interviewnode = async(state: typeof InterviewState.State)=>{
-    const questionindex = state.currentQuestionIndex;
-    const question = state.questions[questionindex]?.content||"";
-    console.log(question)
-    const elevenlabs = new ElevenLabsClient({
-        apiKey:process.env.ELEVENLABS_API_KEY
-    });
-const audio = await elevenlabs.textToSpeech.convert('JBFqnCBsd6RMkjVDRZzb', {
-  text:question,
-  modelId: 'eleven_multilingual_v2',
-  outputFormat: 'mp3_44100_128',
-});
-const reader = audio.getReader();
-const stream = new Readable({
-  async read() {
-    const { done, value } = await reader.read();
-    if (done) {
-      this.push(null);
-    } else {
-      this.push(value);
+export const interviewnode = async (state: typeof InterviewState.State) => {
+  const questionindex = state.currentQuestionIndex;
+  const question = state.questions[questionindex]?.content || "";
+  console.log("Generating audio for question:", question)
+
+  if (!question) {
+    return {
+      awaitingAnswer: true,
+      questionAudio: null
     }
-  },
-});
-await play(stream);
+  }
 
-return{
-    currentQuestionIndex:questionindex+1
-}
+  const elevenlabs = new ElevenLabsClient({
+    apiKey: process.env.ELEVENLABS_API_KEY
+  });
+
+  try {
+    const audioStream = await elevenlabs.textToSpeech.convert('JBFqnCBsd6RMkjVDRZzb', {
+      text: question,
+      modelId: 'eleven_multilingual_v2',
+      outputFormat: 'mp3_44100_128',
+    });
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of audioStream) {
+      chunks.push(Buffer.from(chunk));
+    }
+    const audioBuffer = Buffer.concat(chunks);
+    const audioBase64 = audioBuffer.toString('base64');
+
+    return {
+      awaitingAnswer: true,
+      questionAudio: audioBase64
+    }
+  } catch (error) {
+    console.error("Error generating text to speech:", error);
+    return {
+      awaitingAnswer: true,
+      questionAudio: null
+    }
+  }
 }
