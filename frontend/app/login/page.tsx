@@ -7,8 +7,13 @@ import { useRouter } from "next/navigation"
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false)
-
   const router = useRouter()
+
+  React.useEffect(() => {
+    if (localStorage.getItem("token")) {
+      router.push("/dashboard")
+    }
+  }, [router])
 
   const handlesubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -26,6 +31,7 @@ const LoginPage = () => {
 
       localStorage.setItem("token", res.data.token)
       alert("Login successful 🎉")
+      router.push('/dashboard')
     } catch (err) {
       console.error(err)
       alert("Invalid email or password ❌")
@@ -62,7 +68,6 @@ const LoginPage = () => {
             type="submit"
             disabled={loading}
             className="w-full"
-            onClick={()=>{router.push('/dashboard')}}
           >
             {loading ? "Logging in..." : "Login"}
           </Button>

@@ -1,7 +1,7 @@
 import { ChatMistralAI } from "@langchain/mistralai"
 import { PDFParse } from "pdf-parse"
 import * as z from 'zod'
-import { SystemMessage, HumanMessage } from "langchain"
+import { SystemMessage, HumanMessage } from "@langchain/core/messages"
 import { GraphState } from "./state"
 import fs from 'fs'
 

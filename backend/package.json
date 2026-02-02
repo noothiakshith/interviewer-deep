@@ -16,6 +16,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@deepgram/sdk": "^4.11.3",
     "@e2b/code-interpreter": "^2.3.3",
     "@elevenlabs/elevenlabs-js": "^2.33.0",
     "@langchain/core": "^1.1.17",

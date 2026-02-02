@@ -1,5 +1,5 @@
 import { ChatMistralAI } from "@langchain/mistralai"
-import { HumanMessage, SystemMessage } from "langchain"
+import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { GraphState } from './state'
 import * as z from 'zod'
 
@@ -25,17 +25,10 @@ Your Goal:
 
 Ensure 'url' matches the input URL. Use the exact data provided for 'resume' and 'github' fields, do not hallucinate new values.`
 
-const questionsSchema = z.object({
-  url: z.string(),
-  resume: z.any(),
-  github: z.any(),
-  overallrating: z.number(),
-  verdict: z.string()
-});
-
 const generalschema = z.object({
   url: z.string(),
   resume: z.object({
+    name: z.string(),
     experience: z.number(),
     skills: z.array(z.string()),
     rating: z.number(),
@@ -64,15 +57,25 @@ export const scoringnode = async (state: typeof GraphState.State) => {
   const data = {
     resume: state.resume_data,
     github: state.github_data,
-    input_url: state.input_url,
+    url: state.input_url,
   }
 
+  console.log("scoringnode: Synthesizing final report...");
+  // Use a shorter log if data is too large, but for now let's see it
+  console.log("Data keys:", Object.keys(data));
+  console.log("Resume skills count:", data.resume.skills?.length);
+  console.log("Github techstack count:", data.github.techstack?.length);
 
-
-  const response = await llm.withStructuredOutput(generalschema).invoke([
-    new SystemMessage(systemprompt),
-    new HumanMessage(`Analyze this candidate data and produce the final report:\n${JSON.stringify(data, null, 2)}`)
-  ])
+  let response;
+  try {
+    response = await llm.withStructuredOutput(generalschema).invoke([
+      new SystemMessage(systemprompt),
+      new HumanMessage(`Analyze this candidate data and produce the final report:\n${JSON.stringify(data, null, 2)}`)
+    ])
+  } catch (err) {
+    console.error("Error in scoringnode LLM invocation:", err);
+    throw err;
+  }
 
   console.log("--------------------------------------------------")
   console.log("FINAL SCORING REPORT")
@@ -89,4 +92,3 @@ export const scoringnode = async (state: typeof GraphState.State) => {
     final_report: response
   }
 }
-

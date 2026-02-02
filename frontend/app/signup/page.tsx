@@ -7,8 +7,13 @@ import { useRouter } from "next/navigation"
 
 const SignupPage = () => {
   const [loading, setLoading] = useState(false)
-
   const router = useRouter()
+
+  React.useEffect(() => {
+    if (localStorage.getItem("token")) {
+      router.push("/dashboard")
+    }
+  }, [router])
 
   const formsubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -31,6 +36,7 @@ const SignupPage = () => {
       console.log(response.data)
       alert("Signup successful 🎉")
       form.reset()
+      router.push('/login')
     } catch (err) {
       console.error(err)
       alert("Signup failed ❌")
@@ -83,7 +89,6 @@ const SignupPage = () => {
             type="submit"
             disabled={loading}
             className="w-full"
-            onClick={()=>{router.push('/login')}}
           >
             {loading ? "Signing up..." : "Signup"}
           </Button>

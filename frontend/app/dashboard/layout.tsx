@@ -1,9 +1,12 @@
 import React from 'react'
-import { children } from '../login/layout'
-const layout = ({ children }: children) => {
+import ProtectedRoute from '@/components/ProtectedRoute'
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div>{children}</div>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-slate-50">
+        {children}
+      </div>
+    </ProtectedRoute>
   )
 }
-
-export default layout

@@ -217,7 +217,7 @@ export default function SubmissionDetailsPage() {
                                 <h4 className="text-sm font-bold text-slate-400 uppercase mb-3">Interview Questions Generated</h4>
                                 <div>
                                     {
-                                        report.totalScore>=60?
+                                        report.totalScore>=20?
                                         <Button onClick={()=>{router.push(`/dashboard/interviews/${submission.id}`)}}>Go for an interview</Button>:
                                         <Button disabled>Not Eligible</Button>
 
