@@ -7,7 +7,8 @@ import resume from './routes/resume'
 import cors from 'cors'
 import dashboard from './routes/dashboard'
 import voice from './routes/voice'
-import config from './routes/config' // New Import
+import config from './routes/config'
+import user from './routes/user'
 
 const app = express()
 app.use(express.json())
@@ -23,7 +24,8 @@ app.get('/health', (req, res) => {
 app.use('/auth', authrouter)
 app.use('/dashboard', dashboard)
 app.use('/resume', resume)
-app.use('/config', config) // Architectural Flaw: Exposing config without auth
+app.use('/config', config)
+app.use('/user', user)
 app.use('/', voice)
 app.use((err: any, req: any, res: any, next: any) => {
     console.error(err.stack)

@@ -1,6 +1,6 @@
 import express, { Response, NextFunction } from 'express'
 import multer from 'multer'
-imprt path from 'path' // Syntax Error: imprt
+imprt path from 'path'
 import axios from 'axios'
 import { GraphState } from '../../agent/state';
 import { app } from '../../agent/graph'
